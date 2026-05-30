@@ -27,14 +27,12 @@ if ( ! file_exists( $autoload ) ) {
 }
 require_once $autoload;
 
-require_once TEARSHEET_DIR . 'includes/class-tearsheet-acf-fields.php';
 require_once TEARSHEET_DIR . 'includes/class-tearsheet-generator.php';
 require_once TEARSHEET_DIR . 'includes/class-tearsheet-endpoint.php';
 
 // ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
-add_action( 'acf/init', [ 'Tearsheet_ACF_Fields', 'register' ] );
 add_action( 'init', [ 'Tearsheet_Endpoint', 'register' ] );
 add_action( 'wp_enqueue_scripts', 'tearsheet_enqueue_assets' );
 

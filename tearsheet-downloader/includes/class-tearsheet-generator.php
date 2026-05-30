@@ -8,20 +8,26 @@ use Mpdf\Config\FontVariables;
 /**
  * Builds and streams the tearsheet PDF for a given WooCommerce product.
  *
- * All spec data is read from ACF custom fields (see class-tearsheet-acf-fields.php).
+ * Data sources:
+ *   - Brand (main title) : WooCommerce Brands taxonomy (product_brand)
+ *   - Product name       : WC product title
+ *   - SKU                : WC product SKU
+ *   - All specs          : existing ACF fields (see field names below)
  *
- * PDF layout:
- *  - Centered brand / collection name at top
- *  - Two-column body: specs left, featured image right
- *  - Footer with contact email and website
+ * ACF field names used:
+ *   construction_notes   → Details
+ *   material             → Material
+ *   finish_shown         → Finish Shown
+ *   dim_width            → Width
+ *   dim_depth            → Depth
+ *   dim_height           → Height
+ *   dim_seat_height      → Seat Height
  */
 class Tearsheet_Generator {
 
     private WC_Product $product;
     private int        $post_id;
 
-    // Edit these to match your site.
-    private const BRAND_NAME  = 'Quatrain';
     private const BRAND_EMAIL = 'info@fournircollections.com';
     private const BRAND_SITE  = 'www.fournircollections.com';
 
@@ -53,27 +59,26 @@ class Tearsheet_Generator {
         $default_font_config = ( new FontVariables() )->getDefaults();
 
         return new Mpdf( [
-            'mode'         => 'utf-8',
-            'format'       => 'A4',
-            'margin_top'   => 18,
-            'margin_bottom'=> 20,
-            'margin_left'  => 18,
-            'margin_right' => 18,
-            'fontDir'      => array_merge(
+            'mode'          => 'utf-8',
+            'format'        => 'A4',
+            'margin_top'    => 18,
+            'margin_bottom' => 20,
+            'margin_left'   => 18,
+            'margin_right'  => 18,
+            'fontDir'       => array_merge(
                 $default_config['fontDir'],
                 [ TEARSHEET_DIR . 'assets/fonts/' ]
             ),
-            'fontdata'     => $default_font_config['fontdata'],
-            'default_font' => 'helvetica',
-            'tempDir'      => sys_get_temp_dir() . '/tearsheet_mpdf',
+            'fontdata'      => $default_font_config['fontdata'],
+            'default_font'  => 'helvetica',
+            'tempDir'       => sys_get_temp_dir() . '/tearsheet_mpdf',
         ] );
     }
 
     // ------------------------------------------------------------------
-    // ACF data helpers
+    // Data helpers
     // ------------------------------------------------------------------
 
-    /** Returns the ACF field value as a trimmed string, or '' if empty. */
     private function f( string $field_name ): string {
         if ( ! function_exists( 'get_field' ) ) {
             return '';
@@ -81,25 +86,19 @@ class Tearsheet_Generator {
         return trim( (string) get_field( $field_name, $this->post_id ) );
     }
 
-    /** Returns the product's featured image URL. */
     private function image_url(): string {
         $id  = $this->product->get_image_id();
         $src = $id ? wp_get_attachment_image_src( $id, 'large' ) : false;
         return $src ? $src[0] : '';
     }
 
-    /**
-     * Resolves collection / brand name.
-     * Tries common brand taxonomies, then the ACF field, then the constant.
-     */
-    private function collection(): string {
-        foreach ( [ 'product_brand', 'pwb-brand', 'yith_product_brand' ] as $tax ) {
-            $terms = get_the_terms( $this->post_id, $tax );
-            if ( $terms && ! is_wp_error( $terms ) ) {
-                return esc_html( $terms[0]->name );
-            }
+    /** Brand name from WooCommerce Brands taxonomy. */
+    private function brand(): string {
+        $terms = get_the_terms( $this->post_id, 'product_brand' );
+        if ( $terms && ! is_wp_error( $terms ) ) {
+            return esc_html( $terms[0]->name );
         }
-        return self::BRAND_NAME;
+        return '';
     }
 
     // ------------------------------------------------------------------
@@ -196,37 +195,21 @@ class Tearsheet_Generator {
     // ------------------------------------------------------------------
 
     private function html(): string {
-        $name       = esc_html( $this->product->get_name() );
-        $sku        = esc_html( $this->product->get_sku() );
-        $collection = $this->collection();
-        $image_url  = $this->image_url();
+        $name      = esc_html( $this->product->get_name() );
+        $sku       = esc_html( $this->product->get_sku() );
+        $brand     = $this->brand();
+        $image_url = $this->image_url();
 
         // ACF fields.
-        $details     = $this->f( 'fournir_details' );
-        $material    = $this->f( 'fournir_material' );
-        $finish      = $this->f( 'fournir_finish' );
-        $width       = $this->f( 'fournir_width' );
-        $depth       = $this->f( 'fournir_depth' );
-        $height      = $this->f( 'fournir_height' );
-        $seat_height = $this->f( 'fournir_seat_height' );
-        $com         = $this->f( 'fournir_com' );
-        $col         = $this->f( 'fournir_col' );
-        $lead_time   = $this->f( 'fournir_lead_time' );
+        $notes       = $this->f( 'construction_notes' );
+        $material    = $this->f( 'material' );
+        $finish      = $this->f( 'finish_shown' );
+        $width       = $this->f( 'dim_width' );
+        $depth       = $this->f( 'dim_depth' );
+        $height      = $this->f( 'dim_height' );
+        $seat_height = $this->f( 'dim_seat_height' );
 
-        // Build each section only if data exists.
         $specs_html = '';
-
-        if ( $details ) {
-            $specs_html .= $this->section( 'Details', esc_html( $details ) );
-        }
-
-        if ( $material ) {
-            $specs_html .= $this->section( 'Material', esc_html( $material ) );
-        }
-
-        if ( $finish ) {
-            $specs_html .= $this->section( 'Finish Shown', esc_html( $finish ) );
-        }
 
         $dim_lines = '';
         if ( $width )       { $dim_lines .= 'Width: '       . esc_html( $width )       . '<br>'; }
@@ -234,18 +217,19 @@ class Tearsheet_Generator {
         if ( $height )      { $dim_lines .= 'Height: '      . esc_html( $height )      . '<br>'; }
         if ( $seat_height ) { $dim_lines .= 'Seat Height: ' . esc_html( $seat_height ) . '<br>'; }
         if ( $dim_lines ) {
-            $specs_html .= $this->section( 'Standard Dimensions', $dim_lines );
+            $specs_html .= $this->section( 'Dimensions', $dim_lines );
         }
 
-        $upholstery = '';
-        if ( $com ) { $upholstery .= 'COM: ' . esc_html( $com ) . '<br>'; }
-        if ( $col ) { $upholstery .= 'COL: ' . esc_html( $col ) . '<br>'; }
-        if ( $upholstery ) {
-            $specs_html .= $this->section( 'Notes', $upholstery );
+        if ( $material ) {
+            $specs_html .= $this->section( 'Material', nl2br( esc_html( $material ) ) );
         }
 
-        if ( $lead_time ) {
-            $specs_html .= $this->section( 'Estimated Lead Time', esc_html( $lead_time ) );
+        if ( $finish ) {
+            $specs_html .= $this->section( 'Finish Shown', esc_html( $finish ) );
+        }
+
+        if ( $notes ) {
+            $specs_html .= $this->section( 'Details', nl2br( esc_html( $notes ) ) );
         }
 
         $sku_html = $sku ? '<span class="product-sku">' . $sku . '</span>' : '';
@@ -257,7 +241,7 @@ class Tearsheet_Generator {
         $site  = esc_html( self::BRAND_SITE );
 
         return <<<HTML
-        <div class="brand">{$collection}</div>
+        <div class="brand">{$brand}</div>
 
         <table class="body-table">
           <tr>
