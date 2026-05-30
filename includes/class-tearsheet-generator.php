@@ -230,8 +230,8 @@ class Tearsheet_Generator {
 
     private function section( string $title, string $body ): string {
         $base  = 'color:#1a1a1a;font-family:sans-serif;font-size:10pt;';
-        $title_style = $base . 'font-weight:bold;margin-top:5mm;margin-bottom:0.5mm;';
-        $body_style  = $base . 'line-height:1.6;margin-bottom:1mm;';
+        $title_style = $base . 'font-weight:bold;margin-top:4mm;margin-bottom:0;';
+        $body_style  = $base . 'line-height:1.4;margin-top:0;margin-bottom:1mm;';
         return '<p style="' . $title_style . '">' . esc_html( $title ) . '</p>'
              . '<p style="' . $body_style  . '">' . $body . '</p>';
     }
