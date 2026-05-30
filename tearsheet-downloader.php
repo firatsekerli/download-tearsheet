@@ -34,6 +34,12 @@ require_once TEARSHEET_DIR . 'includes/class-tearsheet-endpoint.php';
 // Boot
 // ---------------------------------------------------------------------------
 add_action( 'init', [ 'Tearsheet_Endpoint', 'register' ] );
+add_action( 'init', function () {
+    $tmp = sys_get_temp_dir() . '/tearsheet_mpdf';
+    if ( ! is_dir( $tmp ) ) {
+        wp_mkdir_p( $tmp );
+    }
+} );
 add_action( 'wp_enqueue_scripts', 'tearsheet_enqueue_assets' );
 
 function tearsheet_enqueue_assets(): void {
@@ -55,7 +61,13 @@ function tearsheet_enqueue_assets(): void {
 
 // Flush rewrite rules on activation / deactivation so the endpoint works.
 register_activation_hook( __FILE__, function () {
+    ob_start();
     Tearsheet_Endpoint::register();
     flush_rewrite_rules();
+    ob_end_clean();
 } );
-register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
+register_deactivation_hook( __FILE__, function () {
+    ob_start();
+    flush_rewrite_rules();
+    ob_end_clean();
+} );
