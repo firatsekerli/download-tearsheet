@@ -132,7 +132,7 @@ class Tearsheet_Generator {
             font-weight: normal;
             font-variant: small-caps;
             letter-spacing: 2px;
-            margin-bottom: 22px;
+            margin-bottom: 8mm;
         }
 
         .body-table { width: 100%; }
@@ -145,7 +145,7 @@ class Tearsheet_Generator {
 
         .col-image {
             width: 55%;
-            vertical-align: bottom;
+            vertical-align: top;
             text-align: right;
         }
 
@@ -206,7 +206,7 @@ class Tearsheet_Generator {
             $specs_html .= $this->section( 'Details', nl2br( esc_html( $notes ) ) );
         }
 
-        $sku_html = $sku ? ' <span style="font-weight:normal;">' . $sku . '</span>' : '';
+        $sku_html = $sku ? $sku : '';
         $img_tag  = $image_url
             ? '<img src="' . esc_url( $image_url ) . '" alt="' . esc_attr( $name ) . '">'
             : '';
@@ -219,8 +219,9 @@ class Tearsheet_Generator {
         <table class="body-table">
           <tr>
             <td class="col-specs">
-              <p style="{$s}font-size:13pt;font-weight:bold;margin-bottom:5px;line-height:1.3;">{$name}{$sku_html}</p>
-              <p style="{$s}font-size:10pt;margin-bottom:16px;">Available in custom sizes and finishes.</p>
+              <p style="{$s}font-size:13pt;font-weight:bold;margin-bottom:0;">{$name}</p>
+              <p style="{$s}font-size:10pt;font-weight:normal;margin-bottom:5mm;">{$sku_html}</p>
+              <p style="{$s}font-size:10pt;margin-bottom:5mm;">Available in custom sizes and finishes.</p>
               {$specs_html}
             </td>
             <td class="col-image">
@@ -233,8 +234,8 @@ class Tearsheet_Generator {
 
     private function section( string $title, string $body ): string {
         $base  = 'color:#1a1a1a;font-family:sans-serif;font-size:10pt;';
-        $title_style = $base . 'font-weight:bold;margin-top:13px;margin-bottom:4px;';
-        $body_style  = $base . 'line-height:1.6;margin-bottom:2px;';
+        $title_style = $base . 'font-weight:bold;margin-top:5mm;margin-bottom:1.5mm;';
+        $body_style  = $base . 'line-height:1.6;margin-bottom:1mm;';
         return '<p style="' . $title_style . '">' . esc_html( $title ) . '</p>'
              . '<p style="' . $body_style  . '">' . $body . '</p>';
     }
