@@ -1,0 +1,11 @@
+{
+  "name": "custom/tearsheet-downloader",
+  "description": "WooCommerce product tearsheet PDF downloader",
+  "require": {
+    "mpdf/mpdf": "^8.2"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist"
+  }
+}
