@@ -43,7 +43,7 @@ class Tearsheet_Generator {
         $site  = esc_html( self::BRAND_SITE );
 
         $mpdf->SetHTMLFooter( <<<HTML
-        <table width="100%" style="border-top:1px solid #333;padding-top:6px;">
+        <table width="100%" style="padding-top:6px;">
           <tr>
             <td style="text-align:center;font-family:serif;font-size:9pt;color:#444;">
               {$email} &nbsp;&nbsp;|&nbsp;&nbsp; {$site}
@@ -117,17 +117,17 @@ class Tearsheet_Generator {
 
     private function css(): string {
         return <<<CSS
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; color: #1a1a1a; }
 
         body {
-            font-family: serif;
+            font-family: sans-serif;
             font-size: 10pt;
             color: #1a1a1a;
         }
 
-        a {
-            color: inherit;
-            text-decoration: none;
+        a, a:link, a:visited {
+            color: #1a1a1a !important;
+            text-decoration: none !important;
         }
 
         .brand {
@@ -137,7 +137,7 @@ class Tearsheet_Generator {
             font-weight: normal;
             font-variant: small-caps;
             letter-spacing: 2px;
-            margin-bottom: 18px;
+            margin-bottom: 22px;
         }
 
         .body-table {
@@ -152,7 +152,7 @@ class Tearsheet_Generator {
 
         .col-image {
             width: 60%;
-            vertical-align: top;
+            vertical-align: bottom;
             text-align: right;
         }
 
@@ -162,46 +162,38 @@ class Tearsheet_Generator {
         }
 
         .product-header {
-            margin-bottom: 4px;
-        }
-
-        .product-name {
-            font-family: sans-serif;
-            font-size: 12pt;
+            font-size: 16pt;
             font-weight: bold;
             color: #1a1a1a;
+            margin-bottom: 6px;
+            line-height: 1.2;
         }
 
         .product-sku {
-            font-family: sans-serif;
-            font-size: 10pt;
+            font-size: 16pt;
             font-weight: normal;
             color: #1a1a1a;
-            margin-left: 16px;
+            margin-left: 10px;
         }
 
         .product-tagline {
-            font-family: sans-serif;
-            font-size: 9pt;
+            font-size: 10.5pt;
             color: #1a1a1a;
-            margin-top: 2px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
 
         .section-title {
-            font-family: sans-serif;
             font-weight: bold;
             font-size: 10pt;
             color: #1a1a1a;
             margin-top: 14px;
-            margin-bottom: 2px;
+            margin-bottom: 6px;
         }
 
         .section-body {
-            font-family: sans-serif;
             font-size: 10pt;
             color: #1a1a1a;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         CSS;
     }
@@ -256,7 +248,7 @@ class Tearsheet_Generator {
             $specs_html .= $this->section( 'Details', nl2br( esc_html( $notes ) ) );
         }
 
-        $sku_html = $sku ? '<span class="product-sku">' . $sku . '</span>' : '';
+        $sku_html = $sku ? ' <span class="product-sku">' . $sku . '</span>' : '';
         $img_tag  = $image_url
             ? '<img src="' . esc_url( $image_url ) . '" alt="' . esc_attr( $name ) . '">'
             : '';
@@ -267,9 +259,7 @@ class Tearsheet_Generator {
         <table class="body-table">
           <tr>
             <td class="col-specs">
-              <p class="product-header">
-                <span class="product-name">{$name}</span>{$sku_html}
-              </p>
+              <p class="product-header">{$name}{$sku_html}</p>
               <p class="product-tagline">Available in custom sizes and finishes.</p>
               {$specs_html}
             </td>
