@@ -221,8 +221,7 @@ class Tearsheet_Generator {
         <div class="brand">{$brand}</div>
 
         <div style="width:42%;">
-          <p style="{$s}font-size:13pt;font-weight:bold;margin-bottom:0;">{$name}</p>
-          <p style="{$s}font-size:10pt;font-weight:normal;margin-bottom:5mm;">{$sku_html}</p>
+          <p style="{$s}font-size:13pt;font-weight:bold;margin-bottom:5mm;">{$name} {$sku_html}</p>
           <p style="{$s}font-size:10pt;margin-bottom:5mm;">Available in custom sizes and finishes.</p>
           {$specs_html}
         </div>
@@ -231,7 +230,7 @@ class Tearsheet_Generator {
 
     private function section( string $title, string $body ): string {
         $base  = 'color:#1a1a1a;font-family:sans-serif;font-size:10pt;';
-        $title_style = $base . 'font-weight:bold;margin-top:5mm;margin-bottom:1.5mm;';
+        $title_style = $base . 'font-weight:bold;margin-top:5mm;margin-bottom:0.5mm;';
         $body_style  = $base . 'line-height:1.6;margin-bottom:1mm;';
         return '<p style="' . $title_style . '">' . esc_html( $title ) . '</p>'
              . '<p style="' . $body_style  . '">' . $body . '</p>';
