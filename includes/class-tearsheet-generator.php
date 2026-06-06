@@ -70,7 +70,7 @@ class Tearsheet_Generator {
 
         return new Mpdf( [
             'mode'          => 'utf-8',
-            'format'        => 'A4',
+            'format'        => 'Letter',
             'margin_top'    => 20,
             'margin_bottom' => 22,
             'margin_left'   => 20,
