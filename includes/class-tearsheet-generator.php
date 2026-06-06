@@ -73,8 +73,8 @@ class Tearsheet_Generator {
             'format'        => 'Letter',
             'margin_top'    => 20,
             'margin_bottom' => 22,
-            'margin_left'   => 20,
-            'margin_right'  => 20,
+            'margin_left'   => 14,
+            'margin_right'  => 14,
             'margin_footer' => 8,
             'fontDir'       => array_merge(
                 $default_config['fontDir'],
@@ -214,7 +214,7 @@ class Tearsheet_Generator {
         $s = 'color:#1a1a1a;font-family:sans-serif;';
 
         return <<<HTML
-        <div style="position:fixed;bottom:25mm;right:18mm;width:62%;text-align:right;">
+        <div style="position:fixed;bottom:18mm;right:12mm;width:62%;text-align:right;">
           {$img_tag}
         </div>
 
