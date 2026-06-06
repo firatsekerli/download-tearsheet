@@ -203,7 +203,7 @@ class Tearsheet_Generator {
         }
 
         if ( $notes ) {
-            $specs_html .= $this->section( 'Details', nl2br( esc_html( $notes ) ) );
+            $specs_html .= $this->section( 'Details', $this->clean_richtext( $notes ) );
         }
 
         $sku_html = $sku ? $sku : '';
@@ -229,10 +229,25 @@ class Tearsheet_Generator {
         HTML;
     }
 
+    /**
+     * Cleans a rich-text ACF value for PDF output.
+     *
+     * Some fields (e.g. construction_notes) contain HTML links. We keep the
+     * link's visible text but drop the href so long URLs don't overflow the
+     * column and collide with the image. Line breaks are preserved.
+     */
+    private function clean_richtext( string $value ): string {
+        // Preserve <br> as newlines before stripping tags.
+        $value = preg_replace( '/<br\s*\/?>/i', "\n", $value );
+        $value = wp_strip_all_tags( $value );
+        $value = trim( $value );
+        return nl2br( esc_html( $value ) );
+    }
+
     private function section( string $title, string $body ): string {
         $base  = 'color:#1a1a1a;font-family:sans-serif;font-size:10pt;';
         $title_style = $base . 'font-weight:bold;margin-top:4mm;margin-bottom:0.5mm;';
-        $body_style  = $base . 'line-height:1.4;margin-top:0;margin-bottom:1mm;';
+        $body_style  = $base . 'line-height:1.4;margin-top:0;margin-bottom:1mm;overflow-wrap:break-word;word-wrap:break-word;';
         return '<p style="' . $title_style . '">' . esc_html( $title ) . '</p>'
              . '<p style="' . $body_style  . '">' . $body . '</p>';
     }
